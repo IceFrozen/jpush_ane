@@ -1,0 +1,1 @@
+java -jar adt.jar -package -tsa none -storetype pkcs12 -keystore zyb.p12 -storepass 123 -target ane androidPush.ane extension.xml  -swc jpushAne.swc -platform Android-ARM  -C .\Android-ARM .

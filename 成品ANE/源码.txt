@@ -1,0 +1,187 @@
+package com.cncloud.jpush
+{
+	
+	import flash.events.EventDispatcher;
+	import flash.events.StatusEvent;
+	import flash.external.ExtensionContext;
+	import flash.system.Capabilities;
+
+	public class JpushANE extends EventDispatcher
+	{
+		private static const EXTENSION_ID : String = "push";
+		private static var _instance : JpushANE;
+		private var _context : ExtensionContext;
+		
+		/**
+		 * 构造函数
+		 */
+		public function JpushANE(appId:String)
+		{
+			if (!_instance)
+			{
+				
+				_context = ExtensionContext.createExtensionContext(EXTENSION_ID,appId);
+				if (!_context)
+				{
+					throw Error("ERROR - Extension context is null. Please check if extension.xml is setup correctly.");
+					return;
+				}
+				_context.addEventListener(StatusEvent.STATUS, onStatus);
+				
+				_instance = this;
+			}
+			else
+			{
+				throw Error("This is a singleton, use getInstance(), do not call the constructor directly.");
+			}
+		}
+		
+		
+		/**
+		 * 获取实例
+		 */
+		public static function getInstance(appId:String) : JpushANE
+		{
+			if (!isSupported) {
+				throw Error("Not IOS or Android");		
+			}else 
+			{
+				return _instance ? _instance : new JpushANE(appId);
+			}
+		}
+		
+		/**
+		 * 初始化实例（必须）
+		 * 
+		 */
+		public function initjpush():void{
+			if(_context){
+				_context.call("init");
+			}
+		}
+		
+		/**
+		 * 注册实例 必须
+		 */
+		public function regrecv():void{
+			if(_context){
+				_context.call("reg");
+			}
+		}
+		
+		
+		
+		/**
+		 * 设置别名
+		 */
+		
+		
+		public function setAlias(alias:String):void{
+			//可以在这里验证一下alias的合法性
+			if(!alias){
+				return;
+			}
+			if(_context){
+				_context.call("set_alias",alias);
+			}
+		}
+		
+		/**
+		 * 设置标签
+		 */
+		public function setTags(tags:Array):void{
+			//可以在这里验证tags的合法性
+			if(tags === null){
+				return ;
+			}
+			if(_context){
+				_context.call("set_tags",tags.toString());
+			}
+		}
+		/**
+		 * 测试用 
+		 */
+		public function showToast(msg:String):void{
+			if(_context){
+				_context.call("toast",msg);
+			}
+		}
+		/**
+		 * 设置时否是调试模式
+		 */
+		public function setDebug(isTest:Boolean):void{
+			
+			if(isTest === null){
+				return 
+			}
+			
+			
+			if(_context){
+				_context.call("setDebug",isTest);
+			}
+		}
+		/**
+		 * openOrclose
+		 * isTest:  true  //打开ｐｕｓｈ消息
+		 * 			false 关闭push消息
+		 */
+		public function setOpen(isOpen:Boolean):void{
+			if(isOpen === null){
+				return 
+			}
+			
+			if(_context){
+				_context.call("openOrclose",isOpen);
+			}
+		}
+		
+		/**
+		 * 得到用户的唯一id
+		 */
+		public function getRegID():Object{
+			var  regid:Object = null;
+			if(_context){
+				regid = _context.call("getRegistrationID");
+			}
+			return regid;
+		}
+		
+		
+		/**
+		 * 检测手机端合法性
+		 */
+		public static function get isSupported() : Boolean
+		{
+			return Capabilities.manufacturer.indexOf("iOS") != -1 || Capabilities.manufacturer.indexOf("Android") != -1;
+		}
+		
+		/***********************时间函数***********************************/
+		protected function onStatus(event:StatusEvent):void
+		{
+			var code:String = event.code;
+			if(code == "onOpen"){
+				//用户点击打开了通知
+				var openEvent:MyEvent = new MyEvent("onOpened");
+				openEvent.data = event.level;
+				dispatchEvent(openEvent);
+			}else if(code == "recv_notify"){
+				//收到了通知
+				var notifyEvent:MyEvent = new MyEvent("onNotify");
+				notifyEvent.data = event.level;
+				dispatchEvent(notifyEvent);
+			}else if(code == "recv_msg"){
+				//自定义消息
+				var msgEvent:MyEvent = new MyEvent("onMsg");
+				msgEvent.data = event.level;
+				dispatchEvent(msgEvent);
+			}else{
+				//
+			}
+			
+		}
+		/********************************************/		
+	
+	
+	
+	}
+}

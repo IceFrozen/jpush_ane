@@ -1,0 +1,15 @@
+<extension xmlns="http://ns.adobe.com/air/extension/2.5">
+    <id>push</id>
+    <versionNumber>1.0</versionNumber>
+    <platforms>
+        <platform name="Android-ARM"> 
+            <applicationDeployment> 
+                <nativeLibrary>pushAne.jar</nativeLibrary> 
+                <initializer>cn.cnloudsky.mainContext.PushMain</initializer> 
+                <finalizer>cn.cnloudsky.mainContext.PushMain</finalizer> 
+            </applicationDeployment>
+        </platform> 
+
+    </platforms>
+</extension>
+
